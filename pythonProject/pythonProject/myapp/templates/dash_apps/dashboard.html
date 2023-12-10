@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Licenças Ambientais</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 8px 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard de Licenças Ambientais</h1>
+
+    <form action="{% url 'dashboard' %}" method="GET">
+        <label for="selecao_pessoa">Selecione uma Pessoa:</label>
+        <select name="selecao_pessoa" id="selecao_pessoa">
+            <option value="">Todas as Pessoas</option>
+            <!-- Adicione opções de pessoas aqui -->
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Número de Licença</th>
+                <th>Descrição</th>
+                <th>Prazo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for licenca in licencas %}
+                <tr>
+                    <td>{{ licenca.numero_licenca }}</td>
+                    <td>{{ licenca.descricao }}</td>
+                    <td>{{ licenca.prazo|date:"d/m/Y" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
