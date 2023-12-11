@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Licenças Ambientais</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 8px 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+
+        #map {
+            height: 400px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard de Licenças Ambientais</h1>
+
+    <form action="{% url 'dashboard' %}" method="GET">
+        <label for="selecao_pessoa">Selecione uma Pessoa:</label>
+        <select name="selecao_pessoa" id="selecao_pessoa">
+            <option value="">Todas as Pessoas</option>
+            <!-- Adicione opções de pessoas aqui -->
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <canvas id="licencasChart" width="400" height="200"></canvas>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Número de Licença</th>
+                <th>Descrição</th>
+                <th>Prazo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for licenca in licencas %}
+                <tr>
+                    <td>{{ licenca.numero_licenca }}</td>
+                    <td>{{ licenca.descricao }}</td>
+                    <td>{{ licenca.prazo|date:"d/m/Y" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="map"></div>
+
+    <script>
+        // Configuração do gráfico
+        var ctx = document.getElementById('licencasChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Pessoa1', 'Pessoa2', 'Pessoa3'], // Substitua pelos nomes reais das pessoas
+                datasets: [{
+                    label: 'Licenças por Pessoa',
+                    data: [10, 5, 8], // Substitua pelos dados reais
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Configuração do mapa
+        var map = L.map('map').setView([0, 0], 2); // Configurar a visualização inicial
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Adicione marcadores ao mapa conforme necessário
+        {% for licenca in licencas %}
+            L.marker([{{ licenca.latitude }}, {{ licenca.longitude }}]).addTo(map)
+                .bindPopup('<b>{{ licenca.descricao }}</b><br>{{ licenca.prazo|date:"d/m/Y" }}');
+        {% endfor %}
+    </script>
+</body>
+</html>
