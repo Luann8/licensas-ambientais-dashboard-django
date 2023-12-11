@@ -11,6 +11,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #bbccdd;
         }
 
         h1 {
@@ -48,18 +49,24 @@
             cursor: pointer;
         }
 
-        canvas {
+        canvas, #map {
             margin-top: 20px;
+            width: 100%;
+            height: 400px;
         }
 
-        #map {
-            height: 400px;
+        /* Adicione um estilo para a div do gráfico */
+        #chartContainer {
             margin-top: 20px;
+            background-color: white; /* Defina a cor de fundo desejada para a div */
+            padding: 20px; /* Adicione um preenchimento para melhorar a aparência */
+            border-radius: 10px; /* Adicione bordas arredondadas se desejar */
         }
     </style>
 </head>
 <body>
     <h1>Dashboard de Licenças Ambientais</h1>
+    <h><img src="https://github.com/Luann8/LPP-1.3-usuarios/blob/main/meio-Ambiente.png?raw=true" alt="logo"></h>
 
     <form action="{% url 'dashboard' %}" method="GET">
         <label for="selecao_pessoa">Selecione uma Pessoa:</label>
@@ -70,7 +77,10 @@
         <button type="submit">Filtrar</button>
     </form>
 
-    <canvas id="licencasChart" width="400" height="200"></canvas>
+    <!-- Adicione a div para o gráfico -->
+    <div id="chartContainer">
+        <canvas id="licencasChart" width="400" height="200"></canvas>
+    </div>
 
     <table>
         <thead>
@@ -95,44 +105,49 @@
 
     <script>
         // Configuração do gráfico
-        var ctx = document.getElementById('licencasChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Pessoa1', 'Pessoa2', 'Pessoa3'], // Substitua pelos nomes reais das pessoas
-                datasets: [{
-                    label: 'Licenças por Pessoa',
-                    data: [10, 5, 8], // Substitua pelos dados reais
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+    var ctx = document.getElementById('licencasChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Alerta', 'Vencida', 'Em vigor'],
+datasets: [{
+    label: 'Licenças Emitidas',
+    data: [10, 20, 30],
+    backgroundColor: ['rgba(255, 223, 65, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(23,184,50, 0.2)'],
+    borderColor: ['rgba(255, 223, 65, 1)', 'rgba(255, 99, 132, 1)', 'rgba(23, 184, 50, 1)'],
+    borderWidth: 1
+}]
+  },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
             }
-        });
-
+        }
+    }
+});
         // Configuração do mapa
-        var map = L.map('map').setView([0, 0], 2); // Configurar a visualização inicial
+        var map = L.map('map').setView([0, 0], 2);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         // Adicione marcadores ao mapa conforme necessário
         {% for licenca in licencas %}
-            L.marker([{{ licenca.latitude }}, {{ licenca.longitude }}]).addTo(map)
+            var marker = L.marker([{{ licenca.latitude }}, {{ licenca.longitude }}]).addTo(map)
                 .bindPopup('<b>{{ licenca.descricao }}</b><br>{{ licenca.prazo|date:"d/m/Y" }}');
+
+            // Verifica se a licença está vencida ou em vigor
+            var today = new Date();
+            var prazo = new Date('{{ licenca.prazo|date:"Y-m-d" }}');
+
+            if (prazo < today) {
+                // A licença está vencida
+                marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png'}));
+                marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Vencida em {{ licenca.prazo|date:"d/m/Y" }}');
+            } else {
+                // A licença está em vigor
+                marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png'}));
+                marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Em vigor até {{ licenca.prazo|date:"d/m/Y" }}');
+            }
         {% endfor %}
     </script>
 </body>
