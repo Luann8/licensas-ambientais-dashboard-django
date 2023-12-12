@@ -12,12 +12,14 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #bbccdd;
+            background-color: #2f2d2d;
         }
 
-        h1 {
-            color: #333;
+        h1{
+            color: #ffffff;
+            text-align: center;
         }
+
 
         table {
             border-collapse: collapse;
@@ -26,13 +28,14 @@
         }
 
         th, td {
-            border: 1px solid #dddddd;
+            border: 1px solid #ffffff;
             text-align: left;
             padding: 8px;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #aeaeae;
+            border-color: #000000;
         }
 
         form {
@@ -50,6 +53,10 @@
             cursor: pointer;
         }
 
+        label{
+            color: #ffffff;
+        }
+
         canvas, #map {
             margin-top: 20px;
             width: 100%;
@@ -58,25 +65,34 @@
 
         /* Adicione um estilo para a div do gráfico */
         #chartContainer {
-            margin-top: 20px;
-            background-color: white; /* Defina a cor de fundo desejada para a div */
-            padding: 20px; /* Adicione um preenchimento para melhorar a aparência */
-            border-radius: 10px; /* Adicione bordas arredondadas se desejar */
+            background-color: #aeaeae; /* Defina a cor de fundo desejada para a div */
+            color: #1b1b1b;
         }
+
+    #map {
+        margin-top: 20px;
+        width: 100%;
+        height: calc(100vh - 500px); /* Ajuste conforme necessário para preencher a parte inferior */
+    }
+
     </style>
 </head>
 <body>
     <h1>Dashboard de Licenças Ambientais</h1>
-    <h><img src="https://github.com/Luann8/LPP-1.3-usuarios/blob/main/meio-Ambiente.png?raw=true" alt="logo"></h>
+    <h1><img src="https://github.com/Luann8/LPP-1.3-usuarios/blob/main/meio-Ambiente.png?raw=true" alt="logo"></h1>
 
     <form action="{% url 'dashboard' %}" method="GET">
-        <label for="selecao_pessoa">Selecione uma Pessoa:</label>
-        <select name="selecao_pessoa" id="selecao_pessoa">
-            <option value="">Todas as Pessoas</option>
-            <!-- Adicione opções de pessoas aqui -->
-        </select>
-        <button type="submit">Filtrar</button>
+    <label for="selecao_pessoa">Selecione ou Digite uma Pessoa:</label>
+    <input list="pessoas" name="selecao_pessoa" id="selecao_pessoa_input" autocomplete="off">
+    <datalist id="pessoas">
+        <option value="Todas as Pessoas"></option>
+        <option value="Pessoa 1"></option>
+        <option value="Pessoa 2"></option>
+        <!-- Adicione mais opções conforme necessário -->
+    </datalist>
+    <button type="submit">Filtrar</button>
     </form>
+
 
     <!-- Adicione a div para o gráfico -->
     <div id="chartContainer">
@@ -112,7 +128,7 @@
     data: {
         labels: ['Alerta', 'Vencida', 'Em vigor'],
 datasets: [{
-    label: 'Licenças Emitidas',
+    label:'Licenças Emitidas',
     data: [10, 20, 30],
     backgroundColor: ['rgba(255, 223, 65, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(23,184,50, 0.2)'],
     borderColor: ['rgba(255, 223, 65, 1)', 'rgba(255, 99, 132, 1)', 'rgba(23, 184, 50, 1)'],
@@ -127,29 +143,53 @@ datasets: [{
         }
     }
 });
-        // Configuração do mapa
-        var map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+// Configuração do mapa
+var map = L.map('map').setView([0, 0], 2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // Adicione marcadores ao mapa conforme necessário
-        {% for licenca in licencas %}
-            var marker = L.marker([{{ licenca.latitude }}, {{ licenca.longitude }}]).addTo(map)
-                .bindPopup('<b>{{ licenca.descricao }}</b><br>{{ licenca.prazo|date:"d/m/Y" }}');
+// Adicione marcadores ao mapa conforme necessário
+{% for licenca in licencas %}
+    var marker = L.marker([{{ licenca.latitude }}, {{ licenca.longitude }}]).addTo(map)
+        .bindPopup('<b>{{ licenca.descricao }}</b><br>{{ licenca.prazo|date:"d/m/Y" }}<br>' +
+                   '<span id="pessoa_info_{{ licenca.id }}">Carregando informações...</span>');
 
-            // Verifica se a licença está vencida ou em vigor
-            var today = new Date();
-            var prazo = new Date('{{ licenca.prazo|date:"Y-m-d" }}');
+    // Verifica se a licença está vencida ou em vigor
+    var today = new Date();
+    var prazo = new Date('{{ licenca.prazo|date:"Y-m-d" }}');
 
-            if (prazo < today) {
-                // A licença está vencida
-                marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png'}));
-                marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Vencida em {{ licenca.prazo|date:"d/m/Y" }}');
-            } else {
-                // A licença está em vigor
-                marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png'}));
-                marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Em vigor até {{ licenca.prazo|date:"d/m/Y" }}');
-            }
-        {% endfor %}
+    if (prazo < today) {
+        // A licença está vencida
+        marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png'}));
+        marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Vencida em {{ licenca.prazo|date:"d/m/Y" }}<br>' +
+                        '<span id="pessoa_info_{{ licenca.id }}">Carregando informações...</span>');
+    } else {
+        // A licença está em vigor
+        marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png'}));
+        marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Em vigor até {{ licenca.prazo|date:"d/m/Y" }}<br>' +
+                        '<span id="pessoa_info_{{ licenca.id }}">Carregando informações...</span>');
+    }
+
+    // Carregar informações da pessoa via AJAX ao clicar no marcador
+    marker.on('click', function() {
+        var infoContainer = document.getElementById('pessoa_info_{{ licenca.id }}');
+        var licencaId = {{ licenca.id }};
+
+        // Fazer uma requisição AJAX para obter as informações da pessoa associada a esta licença
+        // Substitua '/get_pessoa_info/' pela URL correta em sua aplicação Django
+        fetch('/get_pessoa_info/' + licencaId)
+            .then(response => response.json())
+            .then(data => {
+                infoContainer.innerHTML = '<b>' + data.nome + '</b><br>' +
+                                         'Email: ' + data.email + '<br>' +
+                                         'Outras informações: ' + data.outras_informacoes;
+            })
+            .catch(error => {
+                console.error('Erro ao carregar informações da pessoa:', error);
+                infoContainer.innerHTML = 'Erro ao carregar informações';
+            });
+    });
+{% endfor %}
+
     </script>
 </body>
 </html>
