@@ -1,195 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="https://raw.githubusercontent.com/Luann8/LPP-1.3-usuarios/main/icon.ico?token=GHSAT0AAAAAACG3LP2OWTGU3MSMQSRORH36ZIQXDRQ" type="image/x-icon">
     <title>Dashboard de Licenças Ambientais</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-FJ9/Fsp8cmM/Ax6F1UqcmqEXUt0YohYD0yS5Xyl1z8lk9vYNNPa37ryC1swwvOEmdMXaiqIjk1dA1s2JXOwX5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js" />
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #2f2d2d;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease;
+            background-color: #f0f0f0; /* Cor de fundo geral */
+            color: #333; /* Cor do texto geral */
         }
 
-        h1{
-            color: #ffffff;
+        header {
+            background-color: #333;
+            color: #ccc;
+            padding: 15px;
             text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
+        header h1 {
+            margin: 0;
+            font-size: 1.5em;
         }
 
-        th, td {
-            border: 1px solid #ffffff;
-            text-align: left;
+        .toggle-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ffff;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: #333;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #59a84e;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .dashboard-switch {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+            color: #fff;
+        }
+
+        .dashboard-switch button {
             padding: 8px;
-        }
-
-        th {
-            background-color: #aeaeae;
-            border-color: #000000;
-        }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        select {
-            padding: 5px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 8px 12px;
-            font-size: 16px;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #fff;
+            border-radius: 4px;
             cursor: pointer;
         }
 
-        label{
-            color: #ffffff;
+        .dark-mode .dashboard-switch button {
+            background-color: #333;
         }
 
-        canvas, #map {
-            margin-top: 20px;
+        main {
+            padding: 20px;
+        }
+
+        section {
+            background-color: #fff;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+
+        section.active {
+            display: block;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #59a84e; /* Cor do título da seção */
+        }
+
+        .chart-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        table {
             width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: left;
+        }
+
+        #map {
             height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
-        /* Adicione um estilo para a div do gráfico */
-        #chartContainer {
-            background-color: #aeaeae; /* Defina a cor de fundo desejada para a div */
-            color: #1b1b1b;
+        #lista-pessoas {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-    #map {
-        margin-top: 20px;
-        width: 100%;
-        height: calc(100vh - 500px); /* Ajuste conforme necessário para preencher a parte inferior */
-    }
+        #lista-pessoas li {
+            margin: 10px;
+            padding: 15px;
+            background-color: #333; /* Cor de fundo dos itens de pessoas */
+            border-radius: 8px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Sombra suave */
+        }
 
+        .dark-mode body {
+            background-color: #333; /* Cor de fundo geral no modo escuro */
+            color: #fff; /* Cor do texto geral no modo escuro */
+        }
+
+        .dark-mode header {
+            background-color: #333;
+        }
+
+        .dark-mode section {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .dark-mode #lista-pessoas li {
+            background-color: #555;
+            color: #fff;
+        }
     </style>
 </head>
+
 <body>
-    <h1>Dashboard de Licenças Ambientais</h1>
-    <h1><img src="https://github.com/Luann8/LPP-1.3-usuarios/blob/main/meio-Ambiente.png?raw=true" alt="logo"></h1>
+    <header>
+        <h1>Dashboard de Licenças Ambientais</h1>
+        <div class="toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="toggleDarkMode" onchange="toggleDarkMode()">
+                <span class="slider round"></span>
+            </label>
+            <div class="dashboard-switch">
+                <button onclick="toggleDashboard()">Alternar Dashboard</button>
+            </div>
+        </div>
+    </header>
 
-    <form action="{% url 'dashboard' %}" method="GET">
-    <label for="selecao_pessoa">Selecione ou Digite uma Pessoa:</label>
-    <input list="pessoas" name="selecao_pessoa" id="selecao_pessoa_input" autocomplete="off">
-    <datalist id="pessoas">
-        <option value="Todas as Pessoas"></option>
-        <option value="Pessoa 1"></option>
-        <option value="Pessoa 2"></option>
-        <!-- Adicione mais opções conforme necessário -->
-    </datalist>
-    <button type="submit">Filtrar</button>
-    </form>
+    <main>
+        <section id="dashboard-content" class="active">
+            <h2>Dashboard de Licenças</h2>
 
+            <div class="chart-container">
+                <canvas id="chart1"></canvas>
+            </div>
 
-    <!-- Adicione a div para o gráfico -->
-    <div id="chartContainer">
-        <canvas id="licencasChart" width="400" height="200"></canvas>
-    </div>
+            <div class="chart-container">
+                <canvas id="chart2"></canvas>
+            </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Número de Licença</th>
-                <th>Descrição</th>
-                <th>Prazo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for licenca in licencas %}
-                <tr>
-                    <td>{{ licenca.numero_licenca }}</td>
-                    <td>{{ licenca.descricao }}</td>
-                    <td>{{ licenca.prazo|date:"d/m/Y" }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número de Licença</th>
+                        <th>Descrição</th>
+                        <th>Prazo</th>
+                        <th>Localização</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Licença 1</td>
+                        <td>Descrição 1</td>
+                        <td>Prazo 1</td>
+                        <td>Localização 1</td>
+                    </tr>
+                    <tr>
+                        <td>Licença 2</td>
+                        <td>Descrição 2</td>
+                        <td>Prazo 2</td>
+                        <td>Localização 2</td>
+                    </tr>
+                    <tr>
+                        <td>Licença 3</td>
+                        <td>Descrição 3</td>
+                        <td>Prazo 3</td>
+                        <td>Localização 3</td>
+                    </tr>
+                </tbody>
+            </table>
 
-    <div id="map"></div>
+            <div id="map"></div>
+        </section>
 
+        <section id="pessoas-content">
+            <h2>Lista de Pessoas</h2>
+            <ul id="lista-pessoas">
+                <li>
+                    <i class="fas fa-user"></i>
+                    Nome Pessoa 1<br>
+                    Cargo 1
+                </li>
+                <li>
+                    <i class="fas fa-user"></i>
+                    Nome Pessoa 2<br>
+                    Cargo 2
+                </li>
+                <li>
+                    <i class="fas fa-user"></i>
+                    Nome Pessoa 3<br>
+                    Cargo 3
+                </li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Configuração do gráfico
-    var ctx = document.getElementById('licencasChart').getContext('2d');
-    var myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Alerta', 'Vencida', 'Em vigor'],
-datasets: [{
-    label:'Licenças Emitidas',
-    data: [10, 20, 30],
-    backgroundColor: ['rgba(255, 223, 65, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(23,184,50, 0.2)'],
-    borderColor: ['rgba(255, 223, 65, 1)', 'rgba(255, 99, 132, 1)', 'rgba(23, 184, 50, 1)'],
-    borderWidth: 1
-}]
-  },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
-// Configuração do mapa
-var map = L.map('map').setView([0, 0], 2);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-// Adicione marcadores ao mapa conforme necessário
-{% for licenca in licencas %}
-    var marker = L.marker([{{ licenca.latitude }}, {{ licenca.longitude }}]).addTo(map)
-        .bindPopup('<b>{{ licenca.descricao }}</b><br>{{ licenca.prazo|date:"d/m/Y" }}<br>' +
-                   '<span id="pessoa_info_{{ licenca.id }}">Carregando informações...</span>');
-
-    // Verifica se a licença está vencida ou em vigor
-    var today = new Date();
-    var prazo = new Date('{{ licenca.prazo|date:"Y-m-d" }}');
-
-    if (prazo < today) {
-        // A licença está vencida
-        marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png'}));
-        marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Vencida em {{ licenca.prazo|date:"d/m/Y" }}<br>' +
-                        '<span id="pessoa_info_{{ licenca.id }}">Carregando informações...</span>');
-    } else {
-        // A licença está em vigor
-        marker.setIcon(L.icon({iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png'}));
-        marker.bindPopup('<b>{{ licenca.descricao }}</b><br>Em vigor até {{ licenca.prazo|date:"d/m/Y" }}<br>' +
-                        '<span id="pessoa_info_{{ licenca.id }}">Carregando informações...</span>');
-    }
-
-    // Carregar informações da pessoa via AJAX ao clicar no marcador
-    marker.on('click', function() {
-        var infoContainer = document.getElementById('pessoa_info_{{ licenca.id }}');
-        var licencaId = {{ licenca.id }};
-
-        // Fazer uma requisição AJAX para obter as informações da pessoa associada a esta licença
-        // Substitua '/get_pessoa_info/' pela URL correta em sua aplicação Django
-        fetch('/get_pessoa_info/' + licencaId)
-            .then(response => response.json())
-            .then(data => {
-                infoContainer.innerHTML = '<b>' + data.nome + '</b><br>' +
-                                         'Email: ' + data.email + '<br>' +
-                                         'Outras informações: ' + data.outras_informacoes;
-            })
-            .catch(error => {
-                console.error('Erro ao carregar informações da pessoa:', error);
-                infoContainer.innerHTML = 'Erro ao carregar informações';
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx1 = document.getElementById('chart1').getContext('2d');
+            var myChart1 = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Licença C', 'Licença B', 'Licença A'],
+                    datasets: [{
+                        label: 'Número de Licenças',
+                        data: [15, 20, 10],
+                        backgroundColor: [
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
             });
-    });
-{% endfor %}
 
+            var ctx2 = document.getElementById('chart2').getContext('2d');
+            var myChart2 = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Licença C', 'Licença B', 'Licença A'],
+                    datasets: [{
+                        label: 'Número de Licenças',
+                        data: [15, 20, 10], // Mesmos dados do primeiro gráfico
+                        backgroundColor: [
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            var map = L.map('map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([40.7128, -74.0060]).addTo(map)
+                .bindPopup('Licença A - Exemplo');
+        });
+
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+        }
+
+        function toggleDashboard() {
+            const licencasContent = document.getElementById('dashboard-content');
+            const pessoasContent = document.getElementById('pessoas-content');
+
+            licencasContent.classList.toggle('active');
+            pessoasContent.classList.toggle('active');
+        }
     </script>
 </body>
+
 </html>
