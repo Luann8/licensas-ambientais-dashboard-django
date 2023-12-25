@@ -15,8 +15,8 @@
             margin: 0;
             padding: 0;
             transition: background-color 0.3s ease;
-            background-color: #f0f0f0; /* Cor de fundo geral */
-            color: #333; /* Cor do texto geral */
+            background-color: #afafaf;
+            color: #333;
         }
 
         header {
@@ -112,6 +112,7 @@
 
         main {
             padding: 20px;
+            text-align: center;
         }
 
         section {
@@ -121,7 +122,7 @@
             padding: 20px;
             box-sizing: border-box;
             display: none;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         section.active {
@@ -130,12 +131,14 @@
 
         h2 {
             margin-bottom: 20px;
-            color: #59a84e; /* Cor do título da seção */
+            color: #59a84e;
         }
 
         .chart-container {
-            max-width: 400px;
+            max-width: 900px;
             margin: 0 auto;
+            display: inline-block;
+            text-align: right;
         }
 
         table {
@@ -170,23 +173,23 @@
         #lista-pessoas li {
             margin: 10px;
             padding: 15px;
-            background-color: #333; /* Cor de fundo dos itens de pessoas */
+            background-color: #333;
             border-radius: 8px;
             text-align: center;
             color: #fff;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Sombra suave */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             overflow: hidden;
         }
-        
+
         #lista-pessoas li:hover {
             transform: translateY(-5px);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
         }
-        
+
         .dark-mode body {
-            background-color: #333; /* Cor de fundo geral no modo escuro */
-            color: #fff; /* Cor do texto geral no modo escuro */
+            background-color: #333;
+            color: #fff;
         }
 
         .dark-mode header {
@@ -202,8 +205,7 @@
             background-color: #555;
             color: #fff;
         }
-        
-    
+
     </style>
 </head>
 
@@ -228,10 +230,6 @@
 
             <div class="chart-container">
                 <canvas id="chart1"></canvas>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="chart2"></canvas>
             </div>
 
             <table>
@@ -294,12 +292,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Licenças Chart
             var ctx1 = document.getElementById('chart1').getContext('2d');
             var myChart1 = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Vencida', 'Alerta', 'Em Vigor'],
+                    labels: ['Vencida', 'Alerta', 'Vigor'],
                     datasets: [{
                         label: 'Estado das Licenças',
                         data: [5, 8, 12],
@@ -317,46 +314,20 @@
                     }]
                 },
                 options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Pessoas Chart
-            var ctx2 = document.getElementById('chart2').getContext('2d');
-            var myChart2 = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: ['Vencida', 'Alerta', 'Em Vigor'],
-                    datasets: [{
-                        label: 'Número de Pessoas',
-                        data: [10, 15, 20],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(54, 162, 235, 0.7)',
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(54, 162, 235, 1)',
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                    plugins: {
+                        legend: {
+                            position: 'top',
                         },
-                        x: {
-                            beginAtZero: true
-                        }
-                    }
-                }
+                        title: {
+                            display: true,
+                            text: 'Gráfico de Rosca 3D',
+                        },
+                        doughnut3d: {
+                            innerRadius: 0.5,
+                            depth: 20,
+                        },
+                    },
+                },
             });
 
             var map = L.map('map').setView([0, 0], 2);
