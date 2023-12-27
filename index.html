@@ -227,7 +227,7 @@
     <main>
         <section id="dashboard-content" class="active">
             <h2>Dashboard de Licenças</h2>
-
+            
             <div class="chart-container">
                 <canvas id="chart1"></canvas>
             </div>
@@ -268,6 +268,11 @@
 
         <section id="pessoas-content">
             <h2>Lista de Pessoas</h2>
+            <div>
+                <label for="searchInput">Buscar por Nome:</label>
+                <input type="text" id="searchInput" oninput="filterNames()">
+            </div>
+            <br>
             <ul id="lista-pessoas">
                 <li>
                     <i class="fas fa-user"></i>
@@ -292,51 +297,87 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Initial list of people
+            var peopleList = [
+                { name: 'Nome Pessoa 1', role: 'Cargo 1' },
+                { name: 'Nome Pessoa 2', role: 'Cargo 2' },
+                { name: 'Nome Pessoa 3', role: 'Cargo 3' },
+            ];
+
+            // Chart for Licenças
             var ctx1 = document.getElementById('chart1').getContext('2d');
-            var myChart1 = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Vencida', 'Alerta', 'Válido'],
-                    datasets: [{
-                        label: 'Estado das Licenças',
-                        data: [5, 8, 12],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',  // Cor para "Vencida"
-                            'rgba(255, 206, 86, 0.7)',  // Cor para "Alerta"
-                            'rgba(89, 168, 78, 0.7)',  // Nova cor verde para "Válido"
+            var myChart1 = createDoughnutChart(ctx1);
+
+            // Leaflet Map
+            var map = createLeafletMap();
+
+            // Initial rendering of the people list
+            updatePeopleList(peopleList);
+
+            // Function to create Doughnut Chart
+            function createDoughnutChart(ctx) {
+                return new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Vencida', 'Alerta', 'Válido'],
+                        datasets: [{
+                            label: 'Estado das Licenças',
+                            data: [5, 8, 12],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(89, 168, 78, 0.7)',
                             ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(89, 168, 78, 1)',
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Gráfico de Rosca 3D',
-                        },
-                        doughnut3d: {
-                            innerRadius: 0.5,
-                            depth: 20,
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(89, 168, 78, 1)',
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Gráfico de Rosca 3D',
+                            },
+                            doughnut3d: {
+                                innerRadius: 0.5,
+                                depth: 20,
+                            },
                         },
                     },
-                },
-            });
+                });
+            }
 
-            var map = L.map('map').setView([0, 0], 2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+            // Function to create Leaflet Map
+            function createLeafletMap() {
+                var map = L.map('map').setView([0, 0], 2);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
 
-            L.marker([40.7128, -74.0060]).addTo(map)
-                .bindPopup('Licença A - Exemplo');
+                L.marker([40.7128, -74.0060]).addTo(map)
+                    .bindPopup('Licença A - Exemplo');
+
+                return map;
+            }
+
+            // Function to update the list of people in the HTML
+            function updatePeopleList(people) {
+                var listaPessoas = document.getElementById('lista-pessoas');
+                listaPessoas.innerHTML = '';
+
+                people.forEach(function (person) {
+                    var li = document.createElement('li');
+                    li.innerHTML = `<i class="fas fa-user"></i>${person.name}<br>${person.role}`;
+                    listaPessoas.appendChild(li);
+                });
+            }
         });
 
         function toggleDarkMode() {
@@ -352,6 +393,9 @@
             pessoasContent.classList.toggle('active');
         }
     </script>
+</body>
+
+</html>
 </body>
 
 </html>
