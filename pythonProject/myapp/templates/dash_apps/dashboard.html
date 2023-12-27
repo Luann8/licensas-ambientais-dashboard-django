@@ -141,16 +141,20 @@
             text-align: right;
         }
 
+        .scrollable-table {
+            max-height: 300px; /* Defina a altura máxima desejada */
+            overflow-y: auto; /* Adiciona uma barra de rolagem vertical quando necessário */
+            border: 1px solid #ccc; /* Adiciona uma borda para melhorar a aparência */
+        }
+
         table {
             width: 100%;
-            margin-top: 20px;
             border-collapse: collapse;
         }
 
-        table th,
-        table td {
-            border: 1px solid #555;
-            padding: 10px;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
         }
 
@@ -227,63 +231,50 @@
     <main>
         <section id="dashboard-content" class="active">
             <h2>Dashboard de Licenças</h2>
-
+            
             <div class="chart-container">
                 <canvas id="chart1"></canvas>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Número de Licença</th>
-                        <th>Descrição</th>
-                        <th>Prazo</th>
-                        <th>Localização</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Licença 1</td>
-                        <td>Descrição 1</td>
-                        <td>Prazo 1</td>
-                        <td>Localização 1</td>
-                    </tr>
-                    <tr>
-                        <td>Licença 2</td>
-                        <td>Descrição 2</td>
-                        <td>Prazo 2</td>
-                        <td>Localização 2</td>
-                    </tr>
-                    <tr>
-                        <td>Licença 3</td>
-                        <td>Descrição 3</td>
-                        <td>Prazo 3</td>
-                        <td>Localização 3</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Número de Licença</th>
+                            <th>Descrição</th>
+                            <th>Prazo</th>
+                            <th>Localização</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Repita esta linha para cada licença -->
+                        <tr>
+                            <td>{{ licenca.numero }}</td>
+                            <td>{{ licenca.descricao }}</td>
+                            <td>{{ licenca.prazo }}</td>
+                            <td>{{ licenca.localizacao }}</td>
+                        </tr>
+                        <!-- Fim da repetição -->
+                    </tbody>
+                </table>
+            </div>
 
             <div id="map"></div>
         </section>
 
         <section id="pessoas-content">
             <h2>Lista de Pessoas</h2>
+            <div>
+                <label for="searchInput">Buscar por Nome:</label>
+                <input type="text" id="searchInput" oninput="filterNames()">
+            </div>
+            <br>
             <ul id="lista-pessoas">
+                {% for pessoa in pessoas %}
                 <li>
-                    <i class="fas fa-user"></i>
-                    Nome Pessoa 1<br>
-                    Cargo 1
+                    <i class="fas fa-user"></i>{{ pessoa.nome }}<br>{{ pessoa.cargo }}
                 </li>
-                <li>
-                    <i class="fas fa-user"></i>
-                    Nome Pessoa 2<br>
-                    Cargo 2
-                </li>
-                <li>
-                    <i class="fas fa-user"></i>
-                    Nome Pessoa 3<br>
-                    Cargo 3
-                </li>
+                {% endfor %}
             </ul>
         </section>
     </main>
@@ -296,20 +287,12 @@
             var myChart1 = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Vencida', 'Alerta', 'Válido'],
+                    labels: [],
                     datasets: [{
                         label: 'Estado das Licenças',
-                        data: [5, 8, 12],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',  // Cor para "Vencida"
-                            'rgba(255, 206, 86, 0.7)',  // Cor para "Alerta"
-                            'rgba(89, 168, 78, 0.7)',  // Nova cor verde para "Válido"
-                            ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(89, 168, 78, 1)',
-                        ],
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: [],
                         borderWidth: 1
                     }]
                 },
@@ -335,8 +318,8 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            L.marker([40.7128, -74.0060]).addTo(map)
-                .bindPopup('Licença A - Exemplo');
+            L.marker([0, 0]).addTo(map)
+                .bindPopup('Licença A');
         });
 
         function toggleDarkMode() {
