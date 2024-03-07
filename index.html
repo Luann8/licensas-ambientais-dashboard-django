@@ -206,27 +206,39 @@
             color: #fff;
         }
 
+        /* CSS para o botão */
+        .toggleButton {
+            padding: 8px;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .toggleButton:hover {
+            background-color: #555;
+        }
+
     </style>
 </head>
 
 <body>
+    
     <header>
-        <img src="https://github.com/Luann8/licensas-ambientais-dashboard-django/blob/main/OIGcg.png?raw=true" alt="logo">
-        <h1>Dashboard de Licenças Ambientais</h1>
+        <img src="https://raw.githubusercontent.com/Luann8/licensas-ambientais-dashboard-django/main/OIGcg.png?token=GHSAT0AAAAAACNFGUSL26OUWWACLQQRXAYSZPJ4CIA" width="60" height="60">
         <div class="toggle-container">
-            <label class="switch">
-                <input type="checkbox" id="toggleDarkMode" onchange="toggleDarkMode()">
-                <span class="slider round"></span>
-            </label>
-            <div class="dashboard-switch">
-                <button onclick="toggleDashboard()">Alternar</button>
-            </div>
-        </div>
+        </label>
+        <button id="toggleButton" class="toggleButton" onclick="toggleDashboard()">Clientes</button>
+    </div>
+    <label class="switch">
+        <input type="checkbox" id="toggleDarkMode" onchange="toggleDarkMode()">
+        <span class="slider round"></span>
     </header>
-
+    
     <main>
         <section id="dashboard-content" class="active">
-            <h2>Dashboard de Licenças</h2>
+            <h2>Licenças e prazos Ambientais</h2>
             
             <div class="chart-container">
                 <canvas id="chart1"></canvas>
@@ -386,16 +398,21 @@
         }
 
         function toggleDashboard() {
+            const button = document.getElementById('toggleButton');
             const licencasContent = document.getElementById('dashboard-content');
             const pessoasContent = document.getElementById('pessoas-content');
 
-            licencasContent.classList.toggle('active');
-            pessoasContent.classList.toggle('active');
+            if (licencasContent.classList.contains('active')) {
+                licencasContent.classList.remove('active');
+                pessoasContent.classList.add('active');
+                button.innerText = 'Dashboard';
+            } else {
+                licencasContent.classList.add('active');
+                pessoasContent.classList.remove('active');
+                button.innerText = 'Clientes';
+            }
         }
     </script>
-</body>
-
-</html>
 </body>
 
 </html>
